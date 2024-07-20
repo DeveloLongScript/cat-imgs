@@ -27,7 +27,7 @@ export default function Home() {
         alt="Cool cat pic"
         width={600}
         height={600}
-        className="rounded mt-20"
+        className="rounded max-sm:mt-[200px] sm:mt-[100px]"
       />
       <br />
       <br />
