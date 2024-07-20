@@ -2,33 +2,37 @@ import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { getPlaiceholder } from "plaiceholder";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export default function Home() {
-  const [catPic, setCatPic] = useState("");
-  const [w, sW] = useState(0);
-  const [h, sH] = useState(0);
+export default function Home({ initalImage }: { initalImage: any }) {
+  const [img, setImg] = useState<{ src: string; blurDataURL: string }>(
+    initalImage
+  );
   const getCatPicture = () => {
-    fetch("https://api.thecatapi.com/v1/images/search").then((b) =>
+    fetch("/api/hello").then((b) =>
       b.json().then((j) => {
-        setCatPic(j[0].url);
+        setImg(j.imageProps);
       })
     );
   };
-  useEffect(getCatPicture, []);
 
   return (
     <main
       className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className} bg-white rounded`}
     >
-      <Image
-        src={catPic}
-        alt="Cool cat pic"
-        width={600}
-        height={600}
-        className="rounded max-sm:mt-[200px] sm:mt-[100px]"
-      />
+      {img.src != "" && (
+        <Image
+          {...img}
+          alt="Cool cat pic"
+          placeholder="blur"
+          width={600}
+          height={600}
+          className="rounded max-sm:mt-[200px] sm:mt-[100px]"
+        />
+      )}
+
       <br />
       <br />
       <div className="fixed bg-gray w-[300px]">
@@ -55,7 +59,7 @@ export default function Home() {
           <button
             className="bg-black w-[200px] h-[40px] rounded border-none"
             onClick={() => {
-              navigator.clipboard.writeText(catPic);
+              navigator.clipboard.writeText(img.src);
               toast.success("Copied image to clipboard!");
             }}
           >
@@ -65,4 +69,17 @@ export default function Home() {
       </div>
     </main>
   );
+}
+
+export async function getStaticProps() {
+  let result = await fetch("https://api.thecatapi.com/v1/images/search");
+  let json = await result.json();
+
+  const buffer = await fetch(json[0].url).then(async (res) =>
+    Buffer.from(await res.arrayBuffer())
+  );
+
+  const { base64 } = await getPlaiceholder(buffer, { size: 10 });
+
+  return { props: { initalImage: { blurDataURL: base64, src: json[0].url } } };
 }
