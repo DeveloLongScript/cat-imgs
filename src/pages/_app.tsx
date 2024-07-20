@@ -5,7 +5,7 @@ import { Toaster } from "react-hot-toast";
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div>
-      <Toaster position="bottom-center" />
+      <Toaster position="top-center" />
       <Component {...pageProps} />
     </div>
   );
